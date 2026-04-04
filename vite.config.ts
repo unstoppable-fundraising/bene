@@ -1,19 +1,32 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
+import { readFileSync } from 'node:fs';
 import path from "path";
 
-export default defineConfig({
-	plugins: [sveltekit()],
-  	resolve: {
-    		alias: {
-      			$lib: path.resolve("./src/lib"),
-    		},
-  	}
-});
+function esRawPlugin() {
+	return {
+		name: 'es-raw',
+		enforce: 'pre' as const,
+		load(id: string) {
+			if (!id.endsWith('.es')) return null;
+			const source = readFileSync(id, 'utf-8');
+			return `export default ${JSON.stringify(source)};`;
+		}
+	};
+}
 
-const config = {
-	// …
-	ssr: {
-	  noExternal: ['three']
-	}
-  }
+export default defineConfig({
+	plugins: [esRawPlugin(), sveltekit()],
+	resolve: {
+		alias: {
+			$lib: path.resolve("./src/lib"),
+		},
+	},
+	optimizeDeps: {
+		esbuildOptions: {
+			loader: {
+				'.es': 'text',
+			},
+		},
+	},
+});
