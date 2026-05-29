@@ -51,7 +51,7 @@
                 const name = item.content.title?.toLowerCase() || "";
                 const description =
                     item.content.description?.toLowerCase() || "";
-                if (name.includes("test") || description.includes("test")) {
+                if (name.includes("test")) {
                     shouldAdd = false;
                 }
             }
